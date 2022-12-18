@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct ToDoListView: View {
+    @State private var sheetIsPresenred = false
+    
     var toDos = [ "learn Swift",
                   "Build Apps",
                   "Change the World",
@@ -30,6 +32,21 @@ struct ToDoListView: View {
             .navigationTitle("To Do List")
             .navigationBarTitleDisplayMode(.automatic)
             .listStyle(.plain)
+            .font(.title2)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        sheetIsPresenred.toggle()
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                }
+            }
+            .sheet(isPresented: $sheetIsPresenred) {
+                NavigationStack{
+                    DetailView(passedValue: "")
+                }
+            }
         }
         .padding()
     }
