@@ -9,25 +9,27 @@ import SwiftUI
 
 struct ToDoListView: View {
     @State private var sheetIsPresenred = false
-    
-    var toDos = [ "learn Swift",
-                  "Build Apps",
-                  "Change the World",
-                  "Bring the Awesome",
-                  "Take a Vacation"
-    ]
+    @EnvironmentObject var toDosVM: ToDoViewModel
     
     var body: some View {
         NavigationStack{
             List {
-                ForEach(toDos, id: \.self){ toDo in
-                    NavigationLink {
-                        DetailView(passedValue: toDo)
-                    } label: {
-                        Text(toDo)
-                    }
+                ForEach(toDosVM.toDos){ toDo in
+                    HStack {
+                        Image(systemName: toDo.isComplited ? "checkmark.rectangle" : "rectangle")
+                            .onTapGesture{
+                                toDosVM.toggleComplited(toDo: toDo)
+                            }
 
+                        NavigationLink {
+                            DetailView(toDo: toDo)
+                        } label: {
+                            Text(toDo.item)
+                        }
+                    }
                 }
+                .onDelete(perform: toDosVM.delete)
+                .onMove(perform: toDosVM.move)
             }
             .navigationTitle("To Do List")
             .navigationBarTitleDisplayMode(.automatic)
@@ -41,10 +43,14 @@ struct ToDoListView: View {
                         Image(systemName: "plus")
                     }
                 }
+                
+                ToolbarItem(placement: .navigationBarLeading) {
+                    EditButton()
+                }
             }
             .sheet(isPresented: $sheetIsPresenred) {
                 NavigationStack{
-                    DetailView(passedValue: "")
+                    DetailView(toDo: ToDo())
                 }
             }
         }
@@ -55,6 +61,7 @@ struct ToDoListView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ToDoListView()
+            .environmentObject(ToDoViewModel())
     }
 }
 

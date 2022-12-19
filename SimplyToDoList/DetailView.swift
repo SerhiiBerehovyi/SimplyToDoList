@@ -7,46 +7,35 @@
 
 import SwiftUI
 
-struct ToDo {
-    var item: String
-    var reminderIsOn: Bool
-    var dueDate: Date
-    var notes: String
-    var isComplited: Bool
-}
 
 struct DetailView: View {
-    var passedValue: String
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var toDosVM: ToDoViewModel
     
-    @State private var toDo = ""
-    @State private var reminderIsOn = false
-    @State private var dueDate = Date.now + (60*60*24)
-    @State private var notes = ""
-    @State private var isComplited = false
+    @State var toDo: ToDo
     
     
     var body: some View {
         List{
-            TextField("Enter ToDo Here", text: $toDo)
+            TextField("Enter ToDo Here", text: $toDo.item)
                 .font(.title)
                 .textFieldStyle(.roundedBorder)
                 .listRowSeparator(.hidden)
                 
             
-            Toggle("Set Reminder:", isOn: $reminderIsOn)
+            Toggle("Set Reminder:", isOn: $toDo.reminderIsOn)
                 .padding(.top)
                 .listRowSeparator(.hidden)
             
-            DatePicker("Date", selection: $dueDate)
+            DatePicker("Date", selection: $toDo.dueDate)
                 .padding(.bottom)
-                .disabled(!reminderIsOn)
+                .disabled(!toDo.reminderIsOn)
                 
-            TextField("Notes", text: $notes, axis: .vertical)
+            TextField("Notes", text: $toDo.notes, axis: .vertical)
                 .textFieldStyle(.roundedBorder)
                 .listRowSeparator(.hidden)
             
-            Toggle("Completed:", isOn: $isComplited)
+            Toggle("Completed:", isOn: $toDo.isComplited)
                 .padding(.top)
                 .listRowSeparator(.hidden)
         }
@@ -60,23 +49,21 @@ struct DetailView: View {
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button("Save"){
-                    // TODO: add save code here
+                    toDosVM.saveToDo(toDo: toDo)
+                    dismiss()
                 }
             }
         }
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden()
-        
-        .onAppear(){
-            toDo = passedValue
-        }
     }
 }
 
 struct DetailView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack{
-            DetailView(passedValue: "Item 1")
+            DetailView(toDo: ToDo())
+                .environmentObject(ToDoViewModel())
         }
     }
 }
